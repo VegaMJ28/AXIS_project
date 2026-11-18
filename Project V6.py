@@ -3,7 +3,6 @@ import pickle
 import tkinter as tk
 from tkinter import messagebox
 
-
 class User:
     def __init__(self):
         self.name = ""
