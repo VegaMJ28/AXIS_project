@@ -947,7 +947,7 @@ LEVELS = {1: "Poor", 2: "Below Average", 3: "Average", 4: "Above Average", 5: "E
 
 
 def button(text, cmd):
-    tk.Button(frame, text=text, command=cmd, width=25).pack(pady=3)
+    tk.Button(frame, text=text, command=cmd, width=25).pack()
 
 
 def form(fields, secret=()):
