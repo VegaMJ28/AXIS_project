@@ -96,19 +96,15 @@ except FileNotFoundError:
 current_user = None
 usr = User()
 
-
-# =====================================================================
-# CALCULATION MODULE (your original code, unchanged, moved into a function)
-# =====================================================================
 def calculation_module(current_user):
-    test = current_user.fitness_tests[-1]  #last test taken
+    test = current_user.fitness_tests[-1]  
     age = int(current_user.age)
     weight = float(current_user.weight)
     if current_user.gender.upper() in ["MALE", "M"]:
         sex = "M"
     else:
         sex = "F"
-    bench_ratio = test.bench_press_1rm / weight  #relative strength
+    bench_ratio = test.bench_press_1rm / weight  
     leg_ratio = test.leg_press_1rm / weight
     vo2max = (0.022351 * test.run_distance) - 11.3
     if age <= 19:
@@ -137,9 +133,6 @@ def calculation_module(current_user):
     else:
         vo2_group = "70+"
 
-    #  ASSESSMENT MODULE
-    # levels: 1 = Poor, 2 = Below Average, 3 = Average, 4 = Above Average, 5 = Excellent
-    # PUSH-UPS
     if sex == "M" and age_group == "15-19":
         if test.push_ups >= 52:
             push_level = 5
@@ -273,7 +266,6 @@ def calculation_module(current_user):
         else:
             push_level = 1
 
-    #SIT-UPS
     if sex == "M" and age_group == "15-19":
         if test.sit_ups >= 48:
             sit_level = 5
@@ -407,7 +399,6 @@ def calculation_module(current_user):
         else:
             sit_level = 1
 
-    #BENCH PRESS
     if sex == "M" and age_group == "15-19":
         if bench_ratio >= 1.48:
             bench_level = 5
@@ -541,7 +532,6 @@ def calculation_module(current_user):
         else:
             bench_level = 1
 
-    #LEG PRESS
     if sex == "M" and age_group == "15-19":
         if leg_ratio >= 2.27:
             leg_level = 5
@@ -675,7 +665,6 @@ def calculation_module(current_user):
         else:
             leg_level = 1
 
-    #SIT AND REACH
     if sex == "M" and age_group == "15-19":
         if test.sit_and_reach >= 39:
             flex_level = 5
@@ -809,8 +798,6 @@ def calculation_module(current_user):
         else:
             flex_level = 1
 
-    # VO2 MAX
-    # levels: 1 = Poor, 2 = Fair, 3 = Good, 4 = Excellent, 5 = Superior
     if sex == "M" and vo2_group == "20-29":
         if vo2max >= 56:
             cardio_level = 5
@@ -944,13 +931,9 @@ def calculation_module(current_user):
         else:
             cardio_level = 1
 
-    # (added) hand the results back so the GUI can show them
     return vo2max, push_level, sit_level, bench_level, leg_level, flex_level, cardio_level
 
 
-# =====================================================================
-# GUI (replaces the input()/print() menus)
-# =====================================================================
 root = tk.Tk()
 root.title("FITADVISOR / AXIS SYSTEM")
 root.geometry("380x520")
