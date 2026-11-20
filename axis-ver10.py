@@ -2,13 +2,9 @@ import streamlit as st
 import random
 import pickle
 from datetime import date
-
 import pandas as pd
 
-
 FILE = "mybookuser.dat"
-
-
 
 class User:
     def __init__(self):
@@ -23,40 +19,6 @@ class User:
         self.verify = ""
         self.fitness_tests = []
 
-    def create_profile(self):
-        print("\n USER CREATION")
-        self.name = input("Digit your name: ")
-        self.age = input("Digit your age: ")
-        while True:
-            self.gender = input("Indicate your gender (Male/Female): ")
-            if self.gender.upper() in ["MALE", "M", "FEMALE", "F"]:
-                print()
-                break
-            else:
-                print("Please enter either Male or Female\n")
-        self.height = input("Enter your height: ")
-        self.weight = input("Enter your weight: ")
-        self.email = input("Digit your email: ")
-        while True:
-            self.password = input("Create a password: ")
-            self.verify = input("Please enter the password again: ")
-            if self.password == self.verify:
-                break
-            else:
-                print("The passwords should match")
-
-    def display_users_info(self):
-        print("\n USER DATA")
-        print("ID: ", self.id)
-        print("Name: ", self.name)
-        print("Gender: ", self.gender)
-        print("Age: ", self.age)
-        print("Height: ", self.height, "cm")
-        print("Weight: ", self.weight, "kg")
-        print("Email: ", self.email)
-        print("Total Tests Recorded: ", len(self.fitness_tests))
-
-
 class FitnessTest:
     def __init__(self):
         self.test_date = ""
@@ -67,40 +29,20 @@ class FitnessTest:
         self.sit_and_reach = 0.0
         self.run_distance = 0.0
 
-    def input_scores(self):
-        print("FITNESS TEST SCORES")
-        self.test_date = input("Enter test date (DD/MM/YYYY): ").strip()
-        self.push_ups = int(input("Enter number of push-ups: "))
-        self.sit_ups = int(input("Enter number of sit-ups: "))
-        self.bench_press_1rm = float(input("Enter bench press 1RM (kg): "))
-        self.leg_press_1rm = float(input("Enter leg press 1RM (kg): "))
-        self.sit_and_reach = float(input("Enter sit and reach score (cm): "))
-        self.run_distance = float(input("Enter 12-min run distance (meters): "))
-
-    def display_test(self):
-        print(f"\n  [Fecha: {self.test_date}]")
-        print(f"Push-ups: {self.push_ups} | Sit-ups: {self.sit_ups}")
-        print(f"Bench Press 1RM: {self.bench_press_1rm} kg | Leg Press 1RM: {self.leg_press_1rm} kg")
-        print(f"Sit & Reach: {self.sit_and_reach} cm | Distance: {self.run_distance} m")
-
 def load_users():
     users = []
-    try:
-        with open(FILE, "rb") as f:
-            while True:
-                try:
-                    users.append(pickle.load(f))
-                except EOFError:
-                    break
-    except FileNotFoundError:
-        pass
+    with open(FILE, "rb"):
+        while True:
+            try:
+                users.append(pickle.load("mybookuser.dat"))
+            except EOFError:
+                break
     return users
 
-
 def save_users(users):
-    with open(FILE, "wb") as f:
+    with open(FILE, "wb"):
         for u in users:
-            pickle.dump(u, f)
+            pickle.dump(u, "mybookuser.dat")
 
 LEVELS = {1: "Poor", 2: "Below Average", 3: "Average", 4: "Above Average", 5: "Excellent"}
 
@@ -118,7 +60,6 @@ LEG = {"M": [(2.27, 2.05, 1.91, 1.74), (2.27, 2.05, 1.91, 1.74), (2.07, 1.85, 1.
              (1.48, 1.29, 1.18, 1.08), (1.37, 1.17, 1.05, 0.95), (1.32, 1.13, 0.99, 0.88)]}
 FLEX = {"M": [(39, 33, 28, 23), (39, 33, 28, 23), (37, 31, 26, 21), (34, 27, 22, 17), (35, 26, 22, 15), (32, 23, 19, 13)],
         "F": [(40, 35, 31, 26), (40, 35, 31, 26), (39, 34, 30, 25), (37, 32, 28, 23), (37, 30, 27, 23), (34, 28, 25, 21)]}
-# VO2 age groups: 20-29, 30-39, 40-49, 50-59, 60-69, 70+
 VO2 = {"M": [(56, 51, 46, 42), (54, 48, 44, 41), (53, 46, 42, 38), (49, 43, 39, 35), (45, 39, 35, 32), (43, 36, 32, 29)],
        "F": [(49, 44, 40, 36), (47, 42, 37, 34), (45, 39, 36, 33), (41, 36, 32, 29), (37, 33, 29, 27), (37, 30, 28, 26)]}
 
@@ -141,14 +82,13 @@ def get_level(value, cutoffs):
 
 
 def calculation_module(user, test=None):
-    test = test or user.fitness_tests[-1]  # last test taken by default
+    test = test or user.fitness_tests[-1]
     age = int(user.age)
     weight = float(user.weight)
     sex = "M" if user.gender.upper() in ["MALE", "M"] else "F"
     bench_ratio = test.bench_press_1rm / weight  # relative strength
     leg_ratio = test.leg_press_1rm / weight
     vo2max = (0.022351 * test.run_distance) - 11.3
-
     g = get_group(age, [19, 29, 39, 49, 59])   # strength / flexibility group
     v = get_group(age, [29, 39, 49, 59, 69])   # VO2 group
 
@@ -165,44 +105,32 @@ def calculation_module(user, test=None):
 
 def weak_areas(levels):
     weak = [a for a, lv in levels.items() if lv <= 2]
-    if not weak:
-        lowest = min(levels.values())
-        weak = [a for a, lv in levels.items() if lv == lowest][:1]
     return weak
 
 
 class RecommendationEngine:
   """Builds a workout plan and a weekly routine from the assessment levels."""
-
-  # For each metric: exercise to FOCUS on (level 1-2) and to MAINTAIN (level 3+)
-  EXERCISES = {
-      "Push-ups": {
+  EXERCISES = {"Push-ups": {
           "focus": "Incline/knee push-ups, 3 x 8-12, then progress to full push-ups",
           "maintain": "Standard push-ups, 3 x 12-15",
-      },
-      "Sit-ups": {
+      },"Sit-ups": {
           "focus": "Crunches and planks, 3 x 12-15 reps / 20-30 s holds",
           "maintain": "Sit-ups and leg raises, 3 x 15-20",
-      },
-      "Bench press": {
+      },"Bench press": {
           "focus": "Dumbbell bench press, 3 x 8-10 at moderate weight",
           "maintain": "Barbell bench press, 3 x 6-8",
-      },
-      "Leg press": {
+      },"Leg press": {
           "focus": "Bodyweight squats and lunges, 3 x 10-12, then leg press",
           "maintain": "Leg press / squats, 3 x 8-10",
-      },
-      "Flexibility": {
+      },"Flexibility": {
           "focus": "Hamstring and lower-back stretches, 3 x 30 s, daily",
           "maintain": "Full-body stretching routine, 10 min",
-      },
-      "Cardio (VO2 max)": {
+      },"Cardio (VO2 max)": {
           "focus": "Walk/jog intervals (1 min jog, 2 min walk) for 20-30 min",
           "maintain": "Steady run or cycling, 25-35 min",
       },
   }
 
-  # Which metrics are trained each day of the week
   WEEK = {
       "Monday": ["Push-ups", "Bench press"],
       "Tuesday": ["Cardio (VO2 max)"],
@@ -213,23 +141,21 @@ class RecommendationEngine:
       "Sunday": [],
   }
 
-  @classmethod
-  def get_user_plan(cls, levels):
+  def get_user_plan(self, levels):
     plan = {}
     for metric, level in levels.items():
-      is_focus = level <= 2
-      key = "focus" if is_focus else "maintain"
+      focus = level <= 2
+      key = "focus" if focus else "maintain"
       plan[metric] = {
           "level": level,
-          "is_focus": is_focus,
-          "exercise": cls.EXERCISES[metric][key],
+          "is_focus": focus,
+          "exercise": self.EXERCISES[metric][key],
       }
     return plan
 
-  @classmethod
-  def generate_weekly_schedule(cls, plan):
+  def generate_weekly_schedule(self, plan):
     schedule = {}
-    for day, metrics in cls.WEEK.items():
+    for day, metrics in self.WEEK.items():
       if not metrics:
         schedule[day] = ["😴 Rest day / light walk or stretching"]
         continue
@@ -249,7 +175,7 @@ def current_user(users):
     return None
 
 
-def latest_test_or_stop(user):
+def latest_test(user):
     if not user.fitness_tests:
         st.info("No fitness tests yet. Record one in **Record Fitness Test** first.")
         st.stop()
@@ -342,7 +268,7 @@ def record_page(user, users):
 
 def calculation_page(user):
     st.header("Calculation Module")
-    latest_test_or_stop(user)
+    latest_test(user)
     r = calculation_module(user)
     st.caption("Your last test converted into standardized metrics.")
     c = st.columns(3)
@@ -356,7 +282,7 @@ def calculation_page(user):
 
 def assessment_page(user):
     st.header("Personalized Assessment")
-    latest_test_or_stop(user)
+    latest_test(user)
     levels = calculation_module(user)["levels"]
     st.caption("Your last test compared with age/gender standards.")
     for area, lv in levels.items():
@@ -370,14 +296,14 @@ def assessment_page(user):
 
 
 def workout_recommendations_page(user):
-  st.header("💪 Your Personalized Workout Plan")
+  st.header("Your Personalized Workout Plan")
 
-  test = latest_test_or_stop(user)
+  test = latest_test(user)
   calc = calculation_module(user, test)
   levels = calc["levels"]
-
-  user_plan = RecommendationEngine.get_user_plan(levels)
-  weekly_schedule = RecommendationEngine.generate_weekly_schedule(user_plan)
+  engine = RecommendationEngine()
+  user_plan = engine.get_user_plan(levels)
+  weekly_schedule = engine.generate_weekly_schedule(user_plan)
 
   st.subheader(f"Fitness Assessment Results ({test.test_date})")
   cols = st.columns(3)
@@ -472,4 +398,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
